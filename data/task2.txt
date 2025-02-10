@@ -1,1 +1,125 @@
 Write your Task 2 answers in this file
+
+TASK 2.1
+
+Import to localhost
+1. mongoimport -d bedandbreakfast -c listings_and_reviews --type=json --file=listings.json          
+(--host=localhost --port=27017 omitted as it is understood)
+2. mongoimport --host=localhost --port=27017 -d bedandbreakfast -c listings_and_reviews --type=json --file=data/listings.json
+
+Import to Railway mongo
+mongoimport --uri="mongodb://user:password@monorail.proxy.rlwy.net:30147/bedandbreakfast?authSource=admin" -d bedandbreakfast -c listings_and_reviews --type=json --file=listings.json
+
+
+
+TASK 2.2
+
+db.listings_and_reviews.aggregate([
+    { $match: {  // filters only documents where 'address.country' contains 'Australia'
+        'address.country': { $regex: 'australia', $options: 'i' } } 
+    },
+    { $out: 'listings' } // Creates a new collection called 'listings' with the filtered results.
+]);
+
+db.listings_and_reviews.drop(); // drops the original collection if no longer required
+db.listings.count(); // check number return > 0
+db.listings.findOne(); // show a single listing
+
+NOTE: 
+1. $out - When you want to create a new collection (or overwrite it) | It replaces the target collection with the new data (removing all that was previously stored in the collection)
+2. $merge - When you want to add/update data without replacing existing records | It inserts new data and updates existing ones (based on _id)
+
+db.listings_and_reviews.aggregate([
+    {
+        $match: {
+            "address.country": { $regex: "canada", $options: "i" }
+        }
+    },
+    {
+        $merge: {
+            into: "listings",         // Merge into existing "listings" collection
+            whenMatched: "keepExisting",  // If a document with the same _id exists, keep the existing one | replace, merge, keepexisting
+            whenNotMatched: "insert"  // If the document does not exist, insert it | insert, discard
+        }
+    }
+]);
+
+
+
+TASK 2.3
+
+db.listings.aggregate([
+    // automatically filters out empty arrays because it removes documents where reviews is an empty array
+    { $unwind : '$reviews'},
+    { $project: {
+        _id: '$reviews._id', 
+        date: '$reviews.date', 
+        listing_id: '$reviews.listing_id', 
+        
+        reviewer_name: { 
+            $replaceAll: {
+                input: '$reviews.reviewer_name',
+                find: ",",
+                replacement: ""} 
+            }, 
+            
+        comments: {
+            $replaceAll: { // replace all \r with new input (w/o /n)
+                
+                input: {
+                    $replaceAll: { // replace all \n with "" then use as input
+                        input: '$reviews.comments',
+                        find: "\n",
+                        replacement: ""
+                    }
+                },  
+                find: "\r",
+                replacement: ""
+                    
+                }
+            }
+        }
+    },
+//    {$count: "matches"}
+    { $out: "reviews"}
+])
+
+NOTE:
+
+db.listings.aggregate([
+    { $match: { reviews: { $ne: null } } }, // this will not work, empty arrays [] are not the same as null or does not exist
+])
+
+// verify count
+db.listings.aggregate([
+    { $unwind : '$reviews'},
+    { $count: "matches" },
+     
+])
+
+// Check reviewers_name with ',' in them exist
+db.listings.aggregate([
+    { $unwind : '$reviews'},
+    { $match: { 'reviews.reviewer_name': { $regex: ".*,.*", $options: 'i'} // not needed since no need specific positioning, just whether it contains
+    }},
+     
+])
+
+db.listings.aggregate([
+    { $unwind : '$reviews'},
+    { 
+        $match: {
+            $or: [
+                { 'reviews.reviewer_name': { $regex: ",", $options: 'i'} },
+                { 'reviews.comment': { $regex: "\r", $options: 'i'} },
+                { 'reviews.comment': { $regex: "\n", $options: 'i'} }
+            ]
+        }
+    },
+    { $count: "matches"}
+   
+])
+
+
+
+TASK 2.4

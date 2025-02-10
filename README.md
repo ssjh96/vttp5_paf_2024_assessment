@@ -10,3 +10,18 @@ If the result shows a directory path (e.g., /var/lib/mysql-files/), you must pla
 -- optionally enclosed by '"'
 -- lines terminated by '\n'
 -- ignore 1 rows;
+
+MYSQL 
+ROOT
+mysql -u root -p | source task1.sql;
+
+Mongodb
+mongoimport -d bedandbreakfast -c listings_and_reviews --type=json --file=listings.json
+
+using mongosh
+terminal
+mongosh
+show dbs;
+use bedandbreakfast;
+show collections;
+db.<colletionName>.findOne();
