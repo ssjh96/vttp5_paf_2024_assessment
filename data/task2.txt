@@ -123,3 +123,21 @@ db.listings.aggregate([
 
 
 TASK 2.4
+
+db.listings.updateMany(
+    {},  // Matches all documents
+    { $unset: { reviews: "" } } // Removes the 'reviews' field
+);
+
+NOTE: 
+// This does not work as it only removes reviews in the query result, not the actual DB
+db.listings.aggregate([
+    {$project: {reviews:0}}
+])
+
+updateOne() only updates one (the first match), updateMany modifies all documents matching a specified filter
+
+db.listings.updateMany(
+    { price: { $gt: 500 } },  // Only updates listings with price > 500
+    { $unset: { reviews: "" } }
+);
