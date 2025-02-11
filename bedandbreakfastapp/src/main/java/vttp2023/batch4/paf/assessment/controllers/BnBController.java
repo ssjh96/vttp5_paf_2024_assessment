@@ -1,5 +1,6 @@
 package vttp2023.batch4.paf.assessment.controllers;
 
+import java.io.StringReader;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,9 +18,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonReader;
 import vttp2023.batch4.paf.assessment.models.Accommodation;
+import vttp2023.batch4.paf.assessment.models.Bookings;
 import vttp2023.batch4.paf.assessment.services.ListingsService;
 import vttp2023.batch4.paf.assessment.Utils;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @Controller
 @RequestMapping(path = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -95,5 +103,47 @@ public class BnBController {
 	}
 
 	// TODO: Task 6
+	@PostMapping(path = "/accommodation", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> postAccomodation(@RequestBody String payload) 
+	{
+		System.out.println(">>> payload: " + payload);
 
+		if (payload == null || payload.isBlank()) {
+			return ResponseEntity.badRequest().body("Request body cannot be empty");
+		}
+
+		JsonReader jReader = Json.createReader(new StringReader(payload));
+		JsonObject jObj = jReader.readObject();
+		
+		System.out.println(">>> jObj: " + jObj.toString());
+
+		Bookings bookings = new Bookings();
+		bookings.setName(jObj.getString("name"));
+		bookings.setEmail(jObj.getString("email"));
+		bookings.setDuration(jObj.getInt("nights"));
+		bookings.setListingId(jObj.getString("id"));
+
+		// >>> payload: {"name":"hello","email":"hello@email.com","nights":2,"id":"9599384"}
+		// >>> jObj: {"name":"hello","email":"hello@email.com","nights":2,"id":"9599384"}
+
+		try {
+
+			JsonObject jResponse = Json.createObjectBuilder().build();
+
+			listingsSvc.createBooking(bookings);
+
+			return ResponseEntity.ok("{}"); //  alr stated produces json
+			// return ResponseEntity.ok(jResponse.toString());
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			JsonObject jError = Json.createObjectBuilder()
+								.add("message", e.getMessage())
+								.build();
+
+			return ResponseEntity.status(500).body(jError.toString());
+		}
+	}
+	
 }

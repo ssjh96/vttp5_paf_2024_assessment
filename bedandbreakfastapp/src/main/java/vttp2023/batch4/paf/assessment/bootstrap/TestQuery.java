@@ -48,6 +48,10 @@ public class TestQuery implements CommandLineRunner
 
         // TESTING TASK 5
         System.out.println(">>> TEST 5: " + forexService.convert("aud", "sgd", 100f));
+
+
+        // TESTING TASK 6
+        // System.out.println("TEST 6: ");
     }
 
 }

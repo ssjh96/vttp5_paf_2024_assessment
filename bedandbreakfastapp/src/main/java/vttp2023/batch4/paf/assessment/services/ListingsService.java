@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import vttp2023.batch4.paf.assessment.models.Accommodation;
 import vttp2023.batch4.paf.assessment.models.AccommodationSummary;
 import vttp2023.batch4.paf.assessment.models.Bookings;
+import vttp2023.batch4.paf.assessment.models.User;
+import vttp2023.batch4.paf.assessment.repositories.BookingsRepository;
 import vttp2023.batch4.paf.assessment.repositories.ListingsRepository;
 
 @Service
@@ -18,6 +20,9 @@ public class ListingsService {
 
 	@Autowired
 	private ListingsRepository listingsRepo;
+	
+	@Autowired
+	private BookingsRepository bookingsRepository;
 
 	@Autowired
 	private ForexService forexSvc;
@@ -57,6 +62,39 @@ public class ListingsService {
 	// IMPORTANT: DO NOT MODIFY THE SIGNATURE OF THIS METHOD.
 	// You may only add annotations and throw exceptions to this method
 	public void createBooking(Bookings booking) {
+		
+		// Signature = return type and parameters
+		// booking has 
+		//		name -> for check user exist / no exist create new user 
+		//		(booking repo) | (users table)
+		// 		id -> for listing_id in bookings table
+		//		(booking repo) | (bookings table)
+		//		email -> email
+		//		(booking repo) | (bookings table)
+		// 		nights -> duration
+		//		(booking repo) | (bookings table)
+
+		// (bookings table)
+		// booking_id - autogenerate when new Bookings() object constructed
+		// listing_id - from booking object
+		// duration - from booking object
+		// email - from booking object
+		// 
+		// (users table)
+		// name - from booking object
+		// email - from booking object
+
+		// Check if user exist
+		String email = booking.getEmail();
+		Optional<User> optUser = bookingsRepository.userExists(email);
+
+		if(optUser.isEmpty())
+		{
+			User user = new User(email, booking.getName());
+			bookingsRepository.newUser(user);
+		}
+
+		bookingsRepository.newBookings(booking);
 	}
 
 }
