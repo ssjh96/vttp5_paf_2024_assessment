@@ -25,3 +25,8 @@ show dbs;
 use bedandbreakfast;
 show collections;
 db.<colletionName>.findOne();
+
+To do
+1. create railway mysql > create fred > source task1.sql to create db w 3 tables
+2. create railway mongo > run task2.1 - 2.5 cmds > run java -jar csv2sql.jar reviews.csv reviews.sql
+3. source reviews.sql to insert data into mysql's 'reviews' table
