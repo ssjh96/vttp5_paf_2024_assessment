@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import vttp2023.batch4.paf.assessment.models.AccommodationSummary;
 import vttp2023.batch4.paf.assessment.repositories.BookingsRepository;
 import vttp2023.batch4.paf.assessment.repositories.ListingsRepository;
+import vttp2023.batch4.paf.assessment.services.ForexService;
 
 @Component
 public class TestQuery implements CommandLineRunner
@@ -18,6 +19,9 @@ public class TestQuery implements CommandLineRunner
 
     @Autowired
     private BookingsRepository bookingsRepository;
+
+    @Autowired
+    private ForexService forexService;
 
     @Override
     public void run(String... args) throws Exception
@@ -41,6 +45,9 @@ public class TestQuery implements CommandLineRunner
             System.out.println();
             i++;
         }
+
+        // TESTING TASK 5
+        System.out.println(">>> TEST 5: " + forexService.convert("aud", "sgd", 100f));
     }
 
 }
