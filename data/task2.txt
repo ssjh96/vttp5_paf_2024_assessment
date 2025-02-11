@@ -164,7 +164,7 @@ db.listings.aggregate([
 
 
 TASK 2.5
-mongoexport -c reviews -d bedandbreakfast --out=reviews.csv --fields=date,listing_id,reviewer_name,comments
+mongoexport -c reviews -d bedandbreakfast --out=reviews.csv --fields=date,listing_id,reviewer_name,comments // type is required, otherwise default to json
 
 mongoexport --uri="mongodb://localhost:27017/bedandbreakfast" \
     --collection=reviews \
@@ -176,3 +176,30 @@ mongoexport --host=localhost --port=27017 -d bedandbreakfast -c reviews --type=c
 // If in data folder alr, data/reviews.csv will create a data folder inside the data folder
 
 mongoexport --host=localhost --port=27017 -d bedandbreakfast -c reviews --type=csv --out=reviews.csv --fields=date,listing_id,reviewer_name,comments  
+
+
+
+TASK 3
+db.listings.distinct('address.suburb'); // will not work cause empty/null string exist & wrong format
+// distinct returns a flat array [] of values but doesn't output { "_id" : "values" }
+
+db.listings.aggregate([
+  { $match: { "address.suburb": { $nin: ["", null] } } }, // Exclude empty strings and null values
+  { $group: { _id: "$address.suburb" } } // group by distinct suburbs
+]); 
+
+$nin - (Not In) checks for multiple values 
+$ne - excludes a single value
+
+writing $nin: { "address.suburb": { "$nin": ["Sydney", "", null] } } 
+is equivalent to multiple $ne:
+{
+  "$and": [
+    { "address.suburb": { "$ne": "Sydney" } },
+    { "address.suburb": { "$ne": "" } },
+    { "address.suburb": { "$ne": null } }
+  ]
+}
+
+aggregate([]) - always returns an array, [] means result is always an array of obj
+

@@ -1,16 +1,22 @@
 package vttp2023.batch4.paf.assessment.repositories;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import vttp2023.batch4.paf.assessment.Utils;
+import vttp2023.batch4.paf.assessment.Constants.MongoParams;
 import vttp2023.batch4.paf.assessment.models.Accommodation;
 import vttp2023.batch4.paf.assessment.models.AccommodationSummary;
 
@@ -22,15 +28,46 @@ public class ListingsRepository {
 	@Autowired
 	private MongoTemplate template;
 
+
+	// TASK 3
 	/*
 	 * Write the native MongoDB query that you will be using for this method
 	 * inside this comment block
 	 * eg. db.bffs.find({ name: 'fred }) 
-	 *
+	 *db.listings.aggregate([
+		{ $match: {
+			"address.country" : { $regex: "australia", $options: 'i'}, 
+			"address.suburb": { $nin: ["", null] } } }, // Exclude empty and null String
+		{ $group: { _id: "$address.suburb" } } // group by distinct suburbs
+		]);
 	 *
 	 */
-	public List<String> getSuburbs(String country) {
-		return null;
+	public List<String> getSuburbs(String country) 
+	{
+		// Get non-empty and non-null suburbs for given country
+		Criteria criteria = Criteria.where(MongoParams.L_F_COUNTRY).regex(country, "i")
+									.and(MongoParams.L_F_SUBURBS).nin("", null);
+		MatchOperation matchNonEmptyNullSuburbs = Aggregation.match(criteria);
+
+		// Group by distinct sururbs 
+		GroupOperation groupBySuburbs = Aggregation.group(MongoParams.L_F_SUBURBS);
+
+		Aggregation pipeline = Aggregation.newAggregation(matchNonEmptyNullSuburbs, groupBySuburbs);
+
+		AggregationResults<Document> results = template.aggregate(pipeline, MongoParams.C_LISTINGS, Document.class);
+
+		List<Document>  suburbsListDoc = results.getMappedResults(); // Output > [{_id: "xyz"}, {_id: "abc"}]
+
+		// results.getMappedResults().stream().map(doc -> doc.getString("_id")).toList();
+
+		List<String> suburbsList = new ArrayList<>();
+		for(Document d : suburbsListDoc)
+		{
+			suburbsList.add(d.getString(MongoParams.L_F_ID)); // get "_id"
+		}
+
+		return suburbsList;
+		// return null; // returns a failure response for http://localhost:8080/api/suburbs:500 OK 
 	}
 
 	/*

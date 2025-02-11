@@ -29,6 +29,10 @@ public class BnBController {
 
 	@Autowired
 	private ListingsService listingsSvc;
+
+
+
+	// TASK 3 : http://localhost:8080/api/suburbs
 	
 	// IMPORTANT: DO NOT MODIFY THIS METHOD UNLESS REQUESTED TO DO SO
 	// If this method is changed, any assessment task relying on this method will
@@ -40,6 +44,8 @@ public class BnBController {
 		JsonArray result = Json.createArrayBuilder(suburbs).build();
 		return ResponseEntity.ok(result.toString());
 	}
+	
+
 	
 	// IMPORTANT: DO NOT MODIFY THIS METHOD UNLESS REQUESTED TO DO SO
 	// If this method is changed, any assessment task relying on this method will
