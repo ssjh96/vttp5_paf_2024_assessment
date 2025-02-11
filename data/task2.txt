@@ -141,3 +141,38 @@ db.listings.updateMany(
     { price: { $gt: 500 } },  // Only updates listings with price > 500
     { $unset: { reviews: "" } }
 );
+
+To add reviews back: Just $lookup → Temporary (results disappear after query) | $lookup + $merge → Permanent (modifies listings collection by adding back reviews)
+db.listings.aggregate([
+    {
+        $lookup: {
+            from: "reviews",  // Collection to join from
+            localField: "_id",  // Field in 'listings'
+            foreignField: "listing_id",  // Field in 'reviews'
+            as: "reviews"  // Merged field name
+        }
+    },
+    {
+        $merge: {
+            into: "listings",  // Merge back into 'listings'
+            whenMatched: "merge",  // If _id exists, update it
+            whenNotMatched: "fail"  // Do nothing if no match is found
+        }
+    }
+]);
+
+
+
+TASK 2.5
+mongoexport -c reviews -d bedandbreakfast --out=reviews.csv --fields=date,listing_id,reviewer_name,comments
+
+mongoexport --uri="mongodb://localhost:27017/bedandbreakfast" \
+    --collection=reviews \
+    --type=csv \
+    --fields=date,listing_id,reviewer_name,comments \
+    --out=reviews.csv
+
+mongoexport --host=localhost --port=27017 -d bedandbreakfast -c reviews --type=csv --out=data/reviews.csv --fields=date,listing_id,reviewer_name,comments  
+// If in data folder alr, data/reviews.csv will create a data folder inside the data folder
+
+mongoexport --host=localhost --port=27017 -d bedandbreakfast -c reviews --type=csv --out=reviews.csv --fields=date,listing_id,reviewer_name,comments  
