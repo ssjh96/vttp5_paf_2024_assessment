@@ -46,6 +46,10 @@ public class BnBController {
 	}
 	
 
+	// Task 4 - Return an array of accomodation listing summary
+	// Error: Http failure response for http://localhost:8080/api/search?suburb=Forest%20Lodge&persons=1&price_range=100&duration=1: 500 OK
+	// [INPUT] suburb, persons, price_range, duration [FIND]
+	// [OUTPUT] id, name, price, accomodates [project] 
 	
 	// IMPORTANT: DO NOT MODIFY THIS METHOD UNLESS REQUESTED TO DO SO
 	// If this method is changed, any assessment task relying on this method will

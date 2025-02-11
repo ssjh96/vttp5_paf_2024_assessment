@@ -11,4 +11,8 @@ public class MongoParams
     // FIELDS
     public static final String L_F_COUNTRY = "address.country";
 	public static final String L_F_SUBURBS = "address.suburb";    
+    public static final String L_F_PRICE = "price";
+    public static final String L_F_ACCOMMODATES = "accommodates";
+    public static final String L_F_MIN_NIGHTS = "min_nights";
+    public static final String L_F_NAME = "name";
 }
